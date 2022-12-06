@@ -8,7 +8,7 @@ export class CarsImportService {
     createReadStream(path)
       .pipe(parse({ delimiter: ',' }))
       .on('data', function (row) {
-        console.log(row.toString());
+        return row;
       })
       .on('end', function () {
         console.log('finished');

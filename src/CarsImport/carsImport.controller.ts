@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  Inject,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -8,11 +9,19 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { ClientProxy } from '@nestjs/microservices';
 import { CarsImportService } from './carsImport.service';
 
 @Controller('cars-import')
 export class CarsImportController {
-  constructor(private carsImportService: CarsImportService) {}
+  constructor(
+    @Inject('CARS-IMPORT') private readonly client: ClientProxy,
+    private carsImportService: CarsImportService,
+  ) {}
+
+  async onApplicationBootstrap() {
+    await this.client.connect();
+  }
   @Post()
   @UseInterceptors(
     FileInterceptor('cars_list', {
@@ -40,6 +49,7 @@ export class CarsImportController {
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    return this.carsImportService.parseByChunks(file.path);
+    const chunk = this.carsImportService.parseByChunks(file.path);
+    this.client.emit<any>('get_chunk', chunk);
   }
 }

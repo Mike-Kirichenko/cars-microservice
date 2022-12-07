@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import { ClientProxy } from '@nestjs/microservices';
+import { unlink } from 'fs';
 
 @Injectable()
 export class CarsImportService {
@@ -15,10 +16,10 @@ export class CarsImportService {
     createReadStream(path)
       .pipe(parse({ delimiter: ',', from_line: 2 }))
       .on('data', (row) => {
-        this.client.send('get_chunks', row).toPromise();
+        this.client.send('get_chunk', row).toPromise();
       })
       .on('end', function () {
-        console.log('finished');
+        unlink(path, () => console.log('import finished'));
       })
       .on('error', function (error) {
         console.log(error.message);

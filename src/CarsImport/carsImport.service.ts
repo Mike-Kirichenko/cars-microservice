@@ -13,13 +13,20 @@ export class CarsImportService {
   }
 
   public parseByChunks(path: string) {
+    let chunk = [];
     createReadStream(path)
       .pipe(parse({ delimiter: ',', from_line: 2 }))
       .on('data', (row) => {
-        this.client.send('get_chunk', row).toPromise();
+        chunk.push(row);
+        if (chunk.length === 100) {
+          console.log(chunk);
+          this.client.send('get_chunk', chunk).toPromise();
+          chunk = [];
+        }
       })
-      .on('end', function () {
-        unlink(path, () => console.log('import finished'));
+      .on('end', () => {
+        this.client.send('get_chunk', chunk).toPromise();
+        unlink(path, () => console.log('import ended'));
       })
       .on('error', function (error) {
         console.log(error.message);

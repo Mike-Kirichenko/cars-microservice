@@ -13,6 +13,7 @@ import { CarsImportService } from './carsImport.service';
 @Controller('cars-import')
 export class CarsImportController {
   constructor(private carsImportService: CarsImportService) {}
+
   @Post()
   @UseInterceptors(
     FileInterceptor('cars_list', {
@@ -25,11 +26,14 @@ export class CarsImportController {
           callback(null, filename);
         },
       }),
-      fileFilter: (req, file, cb) => {
+      fileFilter: (req, file, callback) => {
         const ext = extname(file.originalname);
         if (ext !== '.csv')
-          return cb(new BadRequestException('Invalid file extension'), false);
-        return cb(null, true);
+          return callback(
+            new BadRequestException('Invalid file extension'),
+            false,
+          );
+        return callback(null, true);
       },
     }),
   )
@@ -37,6 +41,6 @@ export class CarsImportController {
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    return file;
+    this.carsImportService.parseByChunks(file.path);
   }
 }

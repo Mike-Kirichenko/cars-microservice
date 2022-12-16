@@ -45,5 +45,7 @@ export class CarsImpExpService {
       .send('get_exported_list_file', sessionId)
       .toPromise();
     if (file.status === 404) throw new HttpException(file.msg, 404);
+    if (file.status === 200) return { file: file.fileLink };
+    return { fileStatus: file.fileStatus };
   }
 }

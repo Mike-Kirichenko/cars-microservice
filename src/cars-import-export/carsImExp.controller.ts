@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   Controller,
+  Get,
+  Param,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -8,12 +10,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { CarsImportService } from './carsImport.service';
+import { CarsImpExpService } from './carsImExp.service';
 
-@Controller('cars-import')
-export class CarsImportController {
-  constructor(private carsImportService: CarsImportService) {}
-
+@Controller('cars-import-export')
+export class CarsImpExpController {
+  constructor(private carsImpExpService: CarsImpExpService) {}
   @Post()
   @UseInterceptors(
     FileInterceptor('cars_list', {
@@ -41,6 +42,16 @@ export class CarsImportController {
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    this.carsImportService.parseByChunks(file.path);
+    this.carsImpExpService.parseByChunks(file.path);
+  }
+
+  @Get('/status')
+  exportCars() {
+    return this.carsImpExpService.getExportStatus();
+  }
+
+  @Get('/get_file/:sessionId')
+  getListFile(@Param('sessionId') sessionId: string) {
+    return this.carsImpExpService.getFile(sessionId);
   }
 }

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CarsImportModule } from './CarsImport/carsImport.module';
+import { CarsImpExpModule } from './cars-import-export/carsImExp.module';
 
 @Module({
-  imports: [CarsImportModule],
+  imports: [CarsImpExpModule],
 })
 export class AppModule {}

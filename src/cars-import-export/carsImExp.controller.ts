@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Param,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -46,6 +47,11 @@ export class CarsImpExpController {
 
   @Get('/status')
   exportCars() {
-    return this.carsImpExpService.exportList();
+    return this.carsImpExpService.getExportStatus();
+  }
+
+  @Get('/get_file/:sessionId')
+  getListFile(@Param('sessionId') sessionId: string) {
+    return this.carsImpExpService.getFile(sessionId);
   }
 }

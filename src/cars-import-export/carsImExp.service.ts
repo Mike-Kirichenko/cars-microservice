@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import { ClientProxy } from '@nestjs/microservices';
@@ -36,7 +36,14 @@ export class CarsImpExpService {
       });
   }
 
-  public async exportList() {
+  public async getExportStatus() {
     return await this.client.send('export_list', '').toPromise();
+  }
+
+  public async getFile(sessionId: string) {
+    const file = await this.client
+      .send('get_exported_list_file', sessionId)
+      .toPromise();
+    if (file.status === 404) throw new HttpException(file.msg, 404);
   }
 }
